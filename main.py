@@ -227,7 +227,10 @@ def hijack_progress(server_instance):
 
         server_instance.send_sync("progress", progress, server_instance.client_id)
         if preview_image is not None:
-            server_instance.send_sync(BinaryEventTypes.UNENCODED_PREVIEW_IMAGE, preview_image, server_instance.client_id)
+            if isinstance(preview_image, (bytes, bytearray)):
+                server_instance.send_sync(5, preview_image, server_instance.client_id)
+            else:
+                server_instance.send_sync(BinaryEventTypes.UNENCODED_PREVIEW_IMAGE, preview_image, server_instance.client_id)
 
     comfy.utils.set_progress_bar_global_hook(hook)
 
