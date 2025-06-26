@@ -210,7 +210,7 @@ def prompt_worker(q, server_instance):
                 hook_breaker_ac10a0.restore_functions()
 
 
-async def run(server_instance, address='', port=8188, verbose=True, call_on_start=None):
+async def run(server_instance, address='', port=8118, verbose=True, call_on_start=None):
     addresses = []
     for addr in address.split(","):
         addresses.append((addr, port))
