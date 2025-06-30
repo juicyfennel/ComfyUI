@@ -7,7 +7,7 @@ __pycache__/
 /temp/
 /custom_nodes/
 !custom_nodes/example_node.py.example
-!custom_nodes/websocket_glb_save.py
+!custom_nodes/websocket_file_save.py
 !custom_nodes/make-it-animatable_wrapper.py
 extra_model_paths.yaml
 /.vs
