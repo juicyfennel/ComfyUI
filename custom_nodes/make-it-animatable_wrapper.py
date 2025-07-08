@@ -1,7 +1,6 @@
 import os
 from gradio_client import Client, handle_file
 import folder_paths
-from pprint import pprint
 import time
 
 
@@ -46,12 +45,12 @@ class MakeItAnimatableAutoRigger:
         while not job.done():
             time.sleep(0.1)
 
-        gradio_path = job.outputs()[4][8]
+        gradio_path = job.outputs()[4][7]
         file_name = os.path.basename(gradio_path)
-        output_path = os.path.join(folder_paths.get_output_directory(), file_name)
+        output_path = os.path.join(folder_paths.get_output_directory(), f"rigged_{file_name}")
         os.rename(gradio_path, output_path)
 
-        return (str(file_name),)
+        return (str(f"rigged_{file_name}"),)
 
 
 NODE_CLASS_MAPPINGS = {
