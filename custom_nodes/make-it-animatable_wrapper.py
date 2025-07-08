@@ -1,5 +1,8 @@
-import comfy.utils
-from gradio_client import Client, file, handle_file
+import os
+from gradio_client import Client, handle_file
+import folder_paths
+from pprint import pprint
+import time
 
 
 class MakeItAnimatableAutoRigger:
@@ -24,8 +27,8 @@ class MakeItAnimatableAutoRigger:
     def rig_model(self, model_path, animation_path):
         uri = "http://localhost:7860"
         client = Client(uri)
-        result = client.predict(
-            progress=handle_file(f"{uri}/gradio_api/file={model_path}"), # input model
+        job = client.submit(
+            progress=handle_file(os.path.join(folder_paths.get_output_directory(), model_path)), # input model
             param_2=True,           # no fingers
             param_3="T-pose",       # input rest pose
             param_4=[],             # input rest parts
@@ -35,14 +38,20 @@ class MakeItAnimatableAutoRigger:
             param_8=True,           # weight post-processing
             param_9="LeftArm",      # bone name for weights visualization
             param_10=True,          # reset to rest pose
-            param_11=handle_file(f"{uri}/gradio_api/file={animation_path}"), # input animation
+            param_11=handle_file(animation_path), # input animation
             param_12=True,          # retarget animation to character
             param_13=True,          # animation in place (no movement)
             api_name="/pipeline"
         )
-        print(result)
+        while not job.done():
+            time.sleep(0.1)
 
-        return {"ui": {"fbx_file": [result]}, "result": result}
+        gradio_path = job.outputs()[4][8]
+        file_name = os.path.basename(gradio_path)
+        output_path = os.path.join(folder_paths.get_output_directory(), file_name)
+        os.rename(gradio_path, output_path)
+
+        return (str(file_name),)
 
 
 NODE_CLASS_MAPPINGS = {

@@ -27,8 +27,9 @@ class SaveFileWebsocket:
 
     def save_file(self, file_path, chunk_size=65536):
         full_path = os.path.join(folder_paths.get_output_directory(), file_path)
-        print(full_path)
-        file_type = os.path.splitext(file_path)[1]
+        file_type = os.path.splitext(file_path)[1].replace(".", "")
+        s_bytes = file_type.encode('utf-8')
+        file_type_identifier = struct.pack(f'>I{len(s_bytes)}s', len(s_bytes), s_bytes)
         with open(full_path, "rb") as f:
             bytes = f.read()
         num_chunks = len(bytes) // chunk_size
@@ -39,7 +40,8 @@ class SaveFileWebsocket:
             chunk = bytes[i:i+chunk_size]
             part = struct.pack(">I", step)
             total = struct.pack(">I", num_chunks)
-            message = bytearray(part)
+            message = bytearray(file_type_identifier)
+            message.extend(part)
             message.extend(total)
             message.extend(chunk)
             pbar.update_absolute(step, num_chunks, message)
