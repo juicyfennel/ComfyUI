@@ -10,6 +10,7 @@ class SaveFileWebsocket:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
+                    "id": ("STRING",),
                     "file_path": ("STRING",),
                     "chunk_size": ("INT", {"default": 65536, "min": 0, "max": 1073741824})
                 }
@@ -25,7 +26,9 @@ class SaveFileWebsocket:
 
     CATEGORY = "api/util"
 
-    def save_file(self, file_path, chunk_size=65536):
+    def save_file(self, id, file_path, chunk_size=65536):
+        id_bytes = id.encode("utf-8")
+        id = struct.pack(f'>I{len(id_bytes)}s', len(id_bytes), id_bytes)
         full_path = os.path.join(folder_paths.get_output_directory(), file_path)
         file_type = os.path.splitext(file_path)[1].replace(".", "")
         s_bytes = file_type.encode('utf-8')
@@ -40,7 +43,8 @@ class SaveFileWebsocket:
             chunk = bytes[i:i+chunk_size]
             part = struct.pack(">I", step)
             total = struct.pack(">I", num_chunks)
-            message = bytearray(file_type_identifier)
+            message = bytearray(id)
+            message.extend(file_type_identifier)
             message.extend(part)
             message.extend(total)
             message.extend(chunk)
@@ -50,7 +54,7 @@ class SaveFileWebsocket:
         return {"ui": {"sha256": [sha256], "file_type": [file_type]}, "result": sha256}
 
     @classmethod
-    def IS_CHANGED(s, file_path, chunk_size):
+    def IS_CHANGED(s, id, file_path, chunk_size):
         return time.time()
 
 NODE_CLASS_MAPPINGS = {
